@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {
@@ -7,7 +8,7 @@ async fn main() {
     data.insert(String::from("Peter"), String::from("Piper"));
 
     let title = String::from("Mr.");
-    let client = Client::builder().with_title(title).build();
+    let client = Arc::new(Client::builder().with_title(title).build());
     println!("{:?}", &client);
 
     // General Async Pattern
@@ -29,7 +30,8 @@ async fn main() {
     new_data.insert(String::from("Peter"), String::from("Piper"));
 
     for (first, last) in new_data {
-        let handle = tokio::spawn(async move { client.print_name(first, last) });
+        let p_client = client.clone();
+        let handle = tokio::spawn(async move { p_client.print_name(first, last).await; });
         new_handles.push(handle);
     }
     for handle in new_handles {
