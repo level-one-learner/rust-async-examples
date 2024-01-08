@@ -11,30 +11,17 @@ async fn main() {
     let client = Arc::new(Client::builder().with_title(title).build());
     println!("{:?}", &client);
 
-    // General Async Pattern
     let mut handles = vec![];
-    for i in 0..10 {
-        let handle = tokio::spawn(async move {
-            println!("Hello from task {}", i);
-        });
+    let mut data = HashMap::new();
+    data.insert(String::from("John"), String::from("Snow"));
+    data.insert(String::from("Peter"), String::from("Piper"));
+
+    for (first, last) in data {
+        let p_client = client.clone();
+        let handle = tokio::spawn(async move { p_client.print_name(first, last).await; });
         handles.push(handle);
     }
     for handle in handles {
-        handle.await.unwrap();
-    }
-
-    // What I'm trying to do
-    let mut new_handles = vec![];
-    let mut new_data = HashMap::new();
-    new_data.insert(String::from("John"), String::from("Snow"));
-    new_data.insert(String::from("Peter"), String::from("Piper"));
-
-    for (first, last) in new_data {
-        let p_client = client.clone();
-        let handle = tokio::spawn(async move { p_client.print_name(first, last).await; });
-        new_handles.push(handle);
-    }
-    for handle in new_handles {
         handle.await.unwrap();
     }
 }
